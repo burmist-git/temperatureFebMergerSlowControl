@@ -1,0 +1,158 @@
+#include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+//#define HOST "10.0.2.2"
+//#define HOST "localhost"
+#define HOST "arich-dl1.b2nsm.kek.jp"
+#define PORT 8023
+#define TERMCHAR '\n'
+
+int sock_num = -1;
+
+void init_sockaddr (name, hostname, port)
+struct sockaddr_in *name;
+char *hostname;
+unsigned short int port;
+{
+  struct hostent *hostinfo;
+  name->sin_family = AF_INET;
+  name->sin_port = htons (port);
+  hostinfo = gethostbyname (hostname); 
+  if (hostinfo == NULL)
+  {
+    fprintf (stderr, "Unknown host %s. \n", hostname);
+    exit (EXIT_FAILURE);
+  }
+  name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
+}
+
+void connect_tcp (host_name, port)
+unsigned short int port;
+char *host_name;
+{
+  int sock, status;
+  char cmd;
+  struct sockaddr_in servername;
+
+  /* Create the socket */
+  sock = socket (AF_INET, SOCK_STREAM, 0);
+  if (sock < 0)
+  {
+    perror ("socket (client)");
+    exit (EXIT_FAILURE);
+  }
+  /* Connect to the server */
+  init_sockaddr (&servername, host_name, port);
+  if (0 > connect (sock, (struct sockaddr *) &servername,
+                   sizeof (servername)))
+  {
+    close (sock);
+    sock_num = -1;
+    return;
+  }
+  sock_num = sock;
+}
+
+void send_tcp (buff, len)
+char *buff;
+int len;
+{
+  int status, clen;
+
+  clen = len;
+  do
+  {
+    if (0 > (status = write (sock_num, buff, clen)))
+    {
+      perror ("\nwrite(send_tcp)");
+      exit (EXIT_FAILURE);
+    }
+    clen -= status;
+    buff += status;
+  }
+  while (clen);
+}
+
+int read_tcp (buff, len, termch)
+char *buff, termch;
+int len;
+{
+  int status, clen;
+
+  clen = len;
+  do
+  {
+    if (0 > (status = read (sock_num, buff, clen)))
+    {
+      perror ("\nread(recv_tcp)");
+      exit (EXIT_FAILURE);
+    }
+    clen -= status;
+    buff += status;
+  }
+  while (clen && !(termch && (*(buff-1)==termch)));
+  
+  if (clen) {
+    if (*(buff-2)=='\r') {
+      buff--;
+      clen++;
+    }
+    *(buff-1)=0;
+    return (len-clen-1);
+   } else
+    return len;
+}
+
+void disconnect_tcp ()
+{
+  close (sock_num);
+}
+
+int main()
+{
+  int i, nread, nget;
+  int idata[20];
+  float data[20];
+  char GL840_In[1000];
+
+  connect_tcp(HOST, PORT);
+
+// test ID
+  send_tcp("*IDN?\n",6);
+  nread = read_tcp(GL840_In, 1000, TERMCHAR);
+  printf("%s, %d bytes received\n", GL840_In, nread);
+
+  send_tcp(":MEAS:OUTP:ONE?\n",16);
+  nread = read_tcp(GL840_In, 8, 0);
+  GL840_In[8]=0;
+  printf("%s, %d bytes received\n", GL840_In, nread);
+  sscanf(GL840_In,"#6%d",&nget);
+  nread = read_tcp(GL840_In, nget, 0);
+
+  for (i=0;i<20;i++) {
+    idata[i] = GL840_In[2*i];
+    idata[i] = (idata[i]<<8) + (unsigned char)GL840_In[2*i+1];
+  }
+  for (i=0;i<6;i++) data[i]=(float)idata[i]/200.;
+  for (i=10;i<16;i++) data[i]=(float)idata[i]/200.;
+  for (i=6;i<10;i++) data[i]=(float)idata[i]/2000.;
+  for (i=16;i<20;i++) data[i]=(float)idata[i]/2000.;
+  printf("%5.2f C, %5.2f C, %5.2f C, %5.2f C, %5.2f C, %5.2f C\n",
+         data[0],data[1],data[2],data[3],data[4],data[5]);
+  printf("%5.2f C, %5.2f C, %5.2f C, %5.2f C, %5.2f C, %5.2f C\n",
+         data[10],data[11],data[12],data[13],data[14],data[15]);
+  printf("%5.2f V, %5.2f V, %5.2f V, %5.2f V\n",
+         data[6],data[7],data[8],data[9]);
+  printf("%5.2f V, %5.2f V, %5.2f V, %5.2f V\n",
+         data[16],data[17],data[18],data[19]);
+
+  printf("sent\n");
+
+  disconnect_tcp();
+}

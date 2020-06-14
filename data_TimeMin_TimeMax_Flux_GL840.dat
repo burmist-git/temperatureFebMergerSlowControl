@@ -1,0 +1,36 @@
+     lastUpdate: Mon-Apr-15-12:15:44-JST-2019
+
+                   year  month    day   hour    min    sec
+        timeMin:   2018     11     17      5      0      0
+        timeMax:   2100     11     14      9      0      0
+ totalWaterFlux:   5.9 L/min
+    waterTempIn:   22.0 deg
+
+                                             midi LOGGER GL840
+
+                                                                             SEC4   SEC5   SEC6
+    	    ch0:   Temperature of the INcoming  water for Sector 4 (BOTTOM) ------|      |      |
+       	    ch1:   Temperature of the INcoming  water for Sector 5 (BOTTOM)       |------|      |
+    	    ch2:   Temperature of the INcoming  water for Sector 6 (BOTTOM)       |      |------|
+       	    ch3:   Temperature of the OUTcoming water for Sector 5 (BOTTOM)       |------|      |
+       	    ch4:   Temperature of the OUTcoming water for Sector 6 (BOTTOM)       |      |------|
+       	    ch5:   Temperature of the OUTcoming water for Sector 4 (BOTTOM) ------|      |      |
+
+
+	    ch6:   23m long low voltage cable back end voltage (S3-C1) +1.5 MERGER
+    	    ch7:   23m long low voltage cable back end voltage (S3-C1) +3.8 MERGER + FEB
+       	    ch8:   23m long low voltage cable back end voltage (S3-C1) +2.0 FEB
+       	    ch9:   23m long low voltage cable back end voltage (S3-C1) -2.0 FEB
+
+                                                                             SEC1   SEC2   SEC3
+           ch10:   Temperature of the INcoming  water for Sector 1 (TOP)    ------|      |      |
+	   ch11:   Temperature of the INcoming  water for Sector 2 (TOP)          |------|      |
+    	   ch12:   Temperature of the INcoming  water for Sector 3 (TOP)          |      |------|
+    	   ch13:   Temperature of the OUTcoming water for Sector 3 (TOP)          |      |------|
+       	   ch14:   Temperature of the OUTcoming water for Sector 1 (TOP)    ------|      |      |
+    	   ch15:   Temperature of the OUTcoming water for Sector 2 (TOP)          |------|      |
+
+    	   ch16:   27m long low voltage cable back end voltage (S1-C1) +1.5 MERGER 
+       	   ch17:   27m long low voltage cable back end voltage (S1-C1) +3.8 MERGER + FEB
+    	   ch18:   27m long low voltage cable back end voltage (S1-C1) +2.0 FEB
+       	   ch19:   27m long low voltage cable back end voltage (S1-C1) -2.0 FEB
